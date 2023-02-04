@@ -27,10 +27,10 @@ struct Video
   @captions = [] of Invidious::Videos::Captions::Metadata
 
   @[DB::Field(ignore: true)]
-  property adaptive_fmts : Array(Hash(String, JSON::Any))?
+  @adaptive_fmts = [] of IV::Videos::AdaptativeStream
 
   @[DB::Field(ignore: true)]
-  property fmt_stream : Array(Hash(String, JSON::Any))?
+  @fmt_stream = [] of IV::Videos::ProgressiveHttpStream
 
   @[DB::Field(ignore: true)]
   property description : String?
@@ -94,53 +94,32 @@ struct Video
 
   # Methods for parsing streaming data
 
-  def fmt_stream
-    return @fmt_stream.as(Array(Hash(String, JSON::Any))) if @fmt_stream
-
-    fmt_stream = info["streamingData"]?.try &.["formats"]?.try &.as_a.map &.as_h || [] of Hash(String, JSON::Any)
-    fmt_stream.each do |fmt|
-      if s = (fmt["cipher"]? || fmt["signatureCipher"]?).try { |h| HTTP::Params.parse(h.as_s) }
-        s.each do |k, v|
-          fmt[k] = JSON::Any.new(v)
-        end
-        fmt["url"] = JSON::Any.new("#{fmt["url"]}#{DECRYPT_FUNCTION.decrypt_signature(fmt)}")
+  def fmt_stream : Array(IV::Videos::ProgressiveHttpStream)
+    if @fmt_stream.empty?
+      if formats = info.dig?("streamingData", "formats")
+        @fmt_stream = IV::Videos.parse_progressive_formats(formats)
       end
-
-      fmt["url"] = JSON::Any.new("#{fmt["url"]}&host=#{URI.parse(fmt["url"].as_s).host}")
-      fmt["url"] = JSON::Any.new("#{fmt["url"]}&region=#{self.info["region"]}") if self.info["region"]?
     end
 
-    fmt_stream.sort_by! { |f| f["width"]?.try &.as_i || 0 }
-    @fmt_stream = fmt_stream
-    return @fmt_stream.as(Array(Hash(String, JSON::Any)))
+    return @fmt_stream
   end
 
-  def adaptive_fmts
-    return @adaptive_fmts.as(Array(Hash(String, JSON::Any))) if @adaptive_fmts
-    fmt_stream = info["streamingData"]?.try &.["adaptiveFormats"]?.try &.as_a.map &.as_h || [] of Hash(String, JSON::Any)
-    fmt_stream.each do |fmt|
-      if s = (fmt["cipher"]? || fmt["signatureCipher"]?).try { |h| HTTP::Params.parse(h.as_s) }
-        s.each do |k, v|
-          fmt[k] = JSON::Any.new(v)
-        end
-        fmt["url"] = JSON::Any.new("#{fmt["url"]}#{DECRYPT_FUNCTION.decrypt_signature(fmt)}")
+  def adaptive_fmts : Array(IV::Videos::AdaptativeStream)
+    if @adaptive_fmts.empty?
+      if formats = info.dig?("streamingData", "adaptiveFormats")
+        @adaptive_fmts = IV::Videos.parse_adaptative_formats(formats)
       end
-
-      fmt["url"] = JSON::Any.new("#{fmt["url"]}&host=#{URI.parse(fmt["url"].as_s).host}")
-      fmt["url"] = JSON::Any.new("#{fmt["url"]}&region=#{self.info["region"]}") if self.info["region"]?
     end
 
-    fmt_stream.sort_by! { |f| f["width"]?.try &.as_i || 0 }
-    @adaptive_fmts = fmt_stream
-    return @adaptive_fmts.as(Array(Hash(String, JSON::Any)))
+    return @adaptive_fmts
   end
 
-  def video_streams
-    adaptive_fmts.select &.["mimeType"]?.try &.as_s.starts_with?("video")
+  def video_streams : Array(IV::Videos::AdaptativeVideoStream)
+    self.adaptive_fmts.select(IV::Videos::AdaptativeVideoStream)
   end
 
-  def audio_streams
-    adaptive_fmts.select &.["mimeType"]?.try &.as_s.starts_with?("audio")
+  def audio_streams : Array(IV::Videos::AdaptativeAudioStream)
+    self.adaptive_fmts.select(IV::Videos::AdaptativeAudioStream)
   end
 
   # Misc. methods
