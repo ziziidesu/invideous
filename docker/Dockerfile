@@ -2,6 +2,7 @@ FROM crystallang/crystal:1.4.1-alpine AS builder
 RUN apk add --no-cache sqlite-static yaml-static
 
 ARG release
+ARG api_only
 
 WORKDIR /invidious
 COPY ./shard.yml ./shard.yml
@@ -17,20 +18,12 @@ COPY ./.git/ ./.git/
 COPY ./scripts/ ./scripts/
 COPY ./assets/ ./assets/
 COPY ./videojs-dependencies.yml ./videojs-dependencies.yml
+COPY Makefile Makefile
 
 RUN crystal spec --warnings all \
     --link-flags "-lxml2 -llzma"
 
-RUN if [[ "${release}" == 1 ]] ; then \
-        crystal build ./src/invidious.cr \
-        --release \
-        --static --warnings all \
-        --link-flags "-lxml2 -llzma"; \
-    else \
-        crystal build ./src/invidious.cr \
-        --static --warnings all \
-        --link-flags "-lxml2 -llzma"; \
-    fi
+RUN make "RELEASE=${release}" "API_ONLY=${api_only}"
 
 
 FROM alpine:3.16
