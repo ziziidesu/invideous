@@ -415,6 +415,7 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
     "isFamilyFriendly" => JSON::Any.new(family_friendly || false),
     "isListed"         => JSON::Any.new(is_listed || false),
     "isUpcoming"       => JSON::Any.new(is_upcoming || false),
+    "commentsEnabled" => JSON::Any.new(comments_enabled),
     "keywords"         => JSON::Any.new(keywords.map { |v| JSON::Any.new(v) }),
     # Related videos
     "relatedVideos" => JSON::Any.new(related),
@@ -434,8 +435,6 @@ def parse_video_info(video_id : String, player_response : Hash(String, JSON::Any
     "authorThumbnail" => JSON::Any.new(author_thumbnail.try &.as_s || ""),
     "authorVerified"  => JSON::Any.new(author_verified || false),
     "subCountText"    => JSON::Any.new(subs_text || "-"),
-
-    "commentsEnabled" => JSON::Any.new(comments_enabled),
   }
 
   return params
