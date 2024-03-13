@@ -470,7 +470,7 @@ footer a {
   color: #919191;
 }
 
-.footer-content #about-invidious-description > b {
+.footer-content #footer-custom-text > b {
   font-size: 30px;
 }
 
@@ -502,7 +502,7 @@ footer a {
 }
 
 @media screen and (max-width: 929px) {
-  #about-invidious-description {
+  #footer-custom-text {
     display: none;
   }
 }
@@ -583,7 +583,7 @@ span > select {
   color: #7c7c7c !important;
 }
 
-.light-theme footer #about-invidious-description > b {
+.light-theme footer #footer-custom-text > b {
   color: #565D64;
 }
 
@@ -631,7 +631,7 @@ span > select {
     color: #7c7c7c;
   }
   
-  .no-theme footer #about-invidious-description > b {
+  .no-theme footer #footer-custom-text > b {
     color: #565D64;
   }
 
@@ -709,7 +709,7 @@ body.dark-theme {
   color: #313131;
 } 
 
-.dark-theme .footer-content #about-invidious-description > b {
+.dark-theme .footer-content #footer-custom-text > b {
   color: #ccc;
 }
 
@@ -773,7 +773,7 @@ body.dark-theme {
     color: #313131;
   }
 
-  .no-theme footer #about-invidious-description > b {
+  .no-theme footer #footer-custom-text > b {
     color: #ccc;
   }
 }
