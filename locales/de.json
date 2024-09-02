@@ -493,5 +493,7 @@
     "Add to playlist": "Einer Wiedergabeliste hinzufügen",
     "Search for videos": "Nach Videos suchen",
     "toggle_theme": "Thema wechseln",
-    "Add to playlist: ": "Einer Wiedergabeliste hinzufügen: "
+    "Add to playlist: ": "Einer Wiedergabeliste hinzufügen: ",
+    "carousel_go_to": "Zu Folie `x` gehen",
+    "carousel_slide": "Folie {{current}} von {{total}}"
 }
